@@ -1,13 +1,13 @@
 package com.w2m.challenge.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.w2m.challenge.exception.NotFoundException;
 import com.w2m.challenge.model.Spaceship;
 import com.w2m.challenge.service.SpaceshipService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,8 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(SpaceshipController.class)
 class SpaceshipControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -59,23 +58,19 @@ class SpaceshipControllerTest {
                 .thenReturn(spaceship);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/spaceship/1")
-                        .queryParam("limit",String.valueOf(LIMIT_TEN))
-                        .queryParam("offset",String.valueOf(OFFSET)))
+                        .get("/spaceship/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(String.valueOf(SPACESHIP_ID)));
 
     }
 
+    @Test
     void testGetSpaceshipByNegativeId() throws Exception {
-
-        when(spaceshipService.getById(SPACESHIP_ID))
-                .thenReturn(spaceship);
+        when(spaceshipService.getById(NEGATIVE_ID))
+                .thenThrow(new NotFoundException("Spaceship not found"));
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/spaceship/-1")
-                        .queryParam("limit",String.valueOf(LIMIT_TEN))
-                        .queryParam("offset",String.valueOf(OFFSET)))
+                        .get("/spaceship/-1"))
                 .andExpect(status().isNotFound());
 
     }
