@@ -1,6 +1,7 @@
 package com.w2m.challenge.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.w2m.challenge.config.SecurityConfig;
 import com.w2m.challenge.exception.NotFoundException;
 import com.w2m.challenge.model.Spaceship;
 import com.w2m.challenge.service.SpaceshipService;
@@ -9,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -21,6 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SpaceshipController.class)
+@Import(SecurityConfig.class)
+@WithMockUser(username = "w2m-user", password = "w2m-user-password", roles = "W2M-USER")
 class SpaceshipControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -44,11 +49,11 @@ class SpaceshipControllerTest {
                 .thenReturn(spaceships);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/spaceship")
-                .queryParam("limit",String.valueOf(LIMIT_TEN))
-                .queryParam("offset",String.valueOf(OFFSET)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].id").value(String.valueOf(SPACESHIP_ID)));
+                        .get("/spaceship")
+                        .queryParam("limit",String.valueOf(LIMIT_TEN))
+                        .queryParam("offset",String.valueOf(OFFSET)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.[0].id").value(String.valueOf(SPACESHIP_ID)));
     }
 
     @Test
@@ -101,8 +106,8 @@ class SpaceshipControllerTest {
     }
 
     @Test
-    void testDeleteSpaceship() throws Exception {
 
+    void testDeleteSpaceship() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/spaceship/1"))
                 .andExpect(status().isNoContent());

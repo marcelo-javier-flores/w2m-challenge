@@ -18,6 +18,9 @@ public class Spaceship {
         this.name = name;
     }
 
+    public Spaceship() {
+    }
+
     public Long getId() {
         return id;
     }
