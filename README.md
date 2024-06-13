@@ -16,13 +16,23 @@ Permite realizar las siguientes operaciones:
 * Actualizar una nave espacial.
 * Eliminar una nave espacial por ID
 
-##### Iniciar aplicación
+---
+##### Compilar .jar:
+
+    ./mvnw clean package -DskipTests
+
+---
+##### Iniciar aplicación:
 
     docker-compose up
 
 ---
+##### URL Swagger: 
+http://localhost:8080/w2m-challenge/swagger-ui/index.html#/
 
-Una vez levantada la aplicación se puede consultar la siguiente URL del swagger: http://localhost:8080/w2m-challenge/swagger-ui/index.html#/
+##### Credenciales para autenticación:
+- USER: w2m-user
+- PASS: w2m-user-password
 
 ##### En el desarrollo de la aplicación se utiliza:
 * Java 21 JDK

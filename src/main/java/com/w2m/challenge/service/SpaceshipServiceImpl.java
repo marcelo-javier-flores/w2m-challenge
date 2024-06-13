@@ -1,6 +1,9 @@
 package com.w2m.challenge.service;
 
+import com.w2m.challenge.dto.NewSpaceshipDto;
+import com.w2m.challenge.dto.SpaceshipDto;
 import com.w2m.challenge.exception.NotFoundException;
+import com.w2m.challenge.mapper.SpaceshipMapper;
 import com.w2m.challenge.model.Spaceship;
 import com.w2m.challenge.repository.SpaceshipRepository;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.w2m.challenge.config.CaffeineCacheConfig.SPACESHIP_CACHE;
+import static com.w2m.challenge.mapper.SpaceshipMapper.mapToSpaceship;
+import static com.w2m.challenge.mapper.SpaceshipMapper.mapToSpaceshipDto;
 import static com.w2m.challenge.specification.SpaceshipSpecification.nameLike;
 
 @Service
@@ -27,37 +32,39 @@ public class SpaceshipServiceImpl implements SpaceshipService {
     }
 
     @Override
-    public void save(Spaceship spaceship) {
-        spaceshipRepository.save(spaceship);
+    public Spaceship save(NewSpaceshipDto newSpaceshipDto) {
+        return spaceshipRepository.save(mapToSpaceship(newSpaceshipDto));
     }
 
     @Override
     @Cacheable(cacheNames = SPACESHIP_CACHE)
-    public List<Spaceship> getAll(String nameFilter, Integer offset, Integer limit) {
-
-        Specification<Spaceship> filters = Specification.where(StringUtils.isBlank(nameFilter) ? null : nameLike(nameFilter));
-
+    public List<SpaceshipDto> getAll(Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        Page<Spaceship> spaceshipPage = spaceshipRepository.findAll(filters, pageable);
+        Page<Spaceship> spaceshipPage = spaceshipRepository.findAll(pageable);
 
-        return spaceshipPage.getContent();
-
+        return spaceshipPage.getContent().stream().map(SpaceshipMapper::mapToSpaceshipDto).toList();
     }
 
     @Override
-    public Spaceship getById(Long id) {
+    public List<SpaceshipDto> getAllByName(String nameFilter) {
+        Specification<Spaceship> filters = Specification.where(StringUtils.isBlank(nameFilter) ? null : nameLike(nameFilter));
+        return spaceshipRepository.findAll(filters).stream().map(SpaceshipMapper::mapToSpaceshipDto).toList();
+    }
+
+    @Override
+    public SpaceshipDto getById(Long id) {
 
         Optional<Spaceship> foundSpaceship = spaceshipRepository.findById(id);
 
         if(foundSpaceship.isEmpty())
             throw new NotFoundException("Spaceship not found");
 
-        return foundSpaceship.get();
+        return mapToSpaceshipDto(foundSpaceship.get());
     }
 
     @Override
-    public void update(Spaceship spaceship) {
-        spaceshipRepository.save(spaceship);
+    public Spaceship update(SpaceshipDto spaceshipDto) {
+        return spaceshipRepository.save(mapToSpaceship(spaceshipDto));
     }
 
     @Override

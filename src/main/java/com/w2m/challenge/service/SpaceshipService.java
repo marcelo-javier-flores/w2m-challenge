@@ -1,18 +1,22 @@
 package com.w2m.challenge.service;
 
+import com.w2m.challenge.dto.NewSpaceshipDto;
+import com.w2m.challenge.dto.SpaceshipDto;
 import com.w2m.challenge.model.Spaceship;
 
 import java.util.List;
 
 public interface SpaceshipService {
 
-    void save(Spaceship spaceship);
+    Spaceship save(NewSpaceshipDto newSpaceshipDto);
 
-    List<Spaceship> getAll(String nameFilter, Integer offset, Integer limit);
+    List<SpaceshipDto> getAll(Integer offset, Integer limit);
 
-    Spaceship getById(Long id);
+    List<SpaceshipDto> getAllByName(String nameFilter);
 
-    void update(Spaceship spaceship);
+    SpaceshipDto getById(Long id);
+
+    Spaceship update(SpaceshipDto spaceshipDto);
 
     void delete(Long id);
 

@@ -1,5 +1,6 @@
 package com.w2m.challenge.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +18,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
+    @Value("${security.config.user}")
+    private String securityConfigUser;
+    @Value("${security.config.password}")
+    private String securityConfigPassword;
+    @Value("${security.config.rol}")
+    private String securityConfigRol;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -33,9 +39,9 @@ public class SecurityConfig {
     public InMemoryUserDetailsManager userDetailsService() {
 
         UserDetails user = User
-                .withUsername("w2m-user")
-                .password(encoder().encode("w2m-user-password"))
-                .roles("W2M-USER")
+                .withUsername(securityConfigUser)
+                .password(encoder().encode(securityConfigPassword))
+                .roles(securityConfigRol)
                 .build();
 
         return new InMemoryUserDetailsManager(user);

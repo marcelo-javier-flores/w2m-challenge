@@ -1,9 +1,12 @@
 package com.w2m.challenge.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.w2m.challenge.config.AspectConfig;
+import com.w2m.challenge.config.CaffeineCacheConfig;
 import com.w2m.challenge.config.SecurityConfig;
+import com.w2m.challenge.dto.NewSpaceshipDto;
+import com.w2m.challenge.dto.SpaceshipDto;
 import com.w2m.challenge.exception.NotFoundException;
-import com.w2m.challenge.model.Spaceship;
 import com.w2m.challenge.service.SpaceshipService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SpaceshipController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, AspectConfig.class, CaffeineCacheConfig.class})
 @WithMockUser(username = "w2m-user", password = "w2m-user-password", roles = "W2M-USER")
 class SpaceshipControllerTest {
     @Autowired
@@ -33,23 +36,25 @@ class SpaceshipControllerTest {
     @MockBean
     private SpaceshipService spaceshipService;
 
-    private Spaceship spaceship;
-    private List<Spaceship> spaceships;
+    private NewSpaceshipDto newSpaceship;
+    private SpaceshipDto spaceship;
+    private List<SpaceshipDto> spaceships;
 
     @BeforeEach
     void init(){
-        spaceship = new Spaceship(SPACESHIP_ID, "nave-1");
+        newSpaceship = new NewSpaceshipDto("nueva-nave");
+        spaceship = new SpaceshipDto(SPACESHIP_ID, "nave-1");
         spaceships = List.of(spaceship);
     }
 
     @Test
     void testGetAllSpaceships() throws Exception {
 
-        when(spaceshipService.getAll(null,  OFFSET, LIMIT_TEN))
+        when(spaceshipService.getAll( OFFSET, LIMIT_TEN))
                 .thenReturn(spaceships);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/spaceship")
+                        .get("/spaceships")
                         .queryParam("limit",String.valueOf(LIMIT_TEN))
                         .queryParam("offset",String.valueOf(OFFSET)))
                         .andExpect(status().isOk())
@@ -63,7 +68,7 @@ class SpaceshipControllerTest {
                 .thenReturn(spaceship);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/spaceship/1"))
+                        .get("/spaceships/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(String.valueOf(SPACESHIP_ID)));
 
@@ -75,7 +80,7 @@ class SpaceshipControllerTest {
                 .thenThrow(new NotFoundException("Spaceship not found"));
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/spaceship/-1"))
+                        .get("/spaceships/-1"))
                 .andExpect(status().isNotFound());
 
     }
@@ -86,9 +91,9 @@ class SpaceshipControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/spaceship")
+                        .post("/spaceships")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(spaceship)))
+                        .content(objectMapper.writeValueAsString(newSpaceship)))
                 .andExpect(status().isCreated());
 
     }
@@ -99,18 +104,18 @@ class SpaceshipControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/spaceship")
+                        .put("/spaceships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(spaceship)))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test
 
     void testDeleteSpaceship() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/spaceship/1"))
-                .andExpect(status().isNoContent());
+                        .delete("/spaceships/1"))
+                .andExpect(status().isOk());
     }
 
 }
