@@ -34,6 +34,17 @@ http://localhost:8080/w2m-challenge/swagger-ui/index.html#/
 - USER: w2m-user
 - PASS: w2m-user-password
 
+---
+##### JACOCO: Comando para obtener reporte de cobertura. 
+El reporte quedará ubicado en:
+target -> site -> jacoco -> index.html
+
+    mvn clean test
+
+---
+El reporte quedará ubicado en:
+target -> site -> jacoco -> index.html
+
 ##### En el desarrollo de la aplicación se utiliza:
 * Java 21 JDK
 * Spring Boot 3.3.0
