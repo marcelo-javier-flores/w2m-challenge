@@ -1,5 +1,7 @@
 package com.w2m.challenge.service;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.w2m.challenge.config.CaffeineCacheConfig;
 import com.w2m.challenge.dto.NewSpaceshipDto;
 import com.w2m.challenge.dto.SpaceshipDto;
 import com.w2m.challenge.model.Spaceship;
@@ -10,6 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,13 +25,18 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.w2m.challenge.util.MockConstant.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+@Import({CaffeineCacheConfig.class})
 @ExtendWith(SpringExtension.class)
 class SpaceshipServiceTest {
+
+    @Mock
+    private CacheManager cacheManager;
 
     @Mock
     private SpaceshipRepository spaceshipRepository;
@@ -38,8 +49,15 @@ class SpaceshipServiceTest {
     private Spaceship spaceship;
     private List<Spaceship> spaceships;
 
+    private Cache cache;
+
     @BeforeEach
     void init(){
+        cache =  new ConcurrentMapCache(
+                "mock_cache",
+                Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).maximumSize(100).build().asMap(),
+                false
+        );
         newSpaceshipDto = new NewSpaceshipDto("nave-1");
         spaceshipDto = new SpaceshipDto(SPACESHIP_ID, "nave-1");
         spaceship = new Spaceship(SPACESHIP_ID, "nave-1");
@@ -48,6 +66,9 @@ class SpaceshipServiceTest {
 
     @Test
     void saveSpaceship(){
+        when(cacheManager.getCache(any()))
+                .thenReturn(cache);
+
         when(spaceshipRepository.save(any()))
                 .thenReturn(spaceship);
 
@@ -57,6 +78,10 @@ class SpaceshipServiceTest {
 
     @Test
     void UpdateSpaceship(){
+
+        when(cacheManager.getCache(any()))
+                .thenReturn(cache);
+
         when(spaceshipRepository.save(any()))
                 .thenReturn(spaceship);
 
